@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Thèses Universitaires Réelles</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .search-options {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .search-options label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .search-options select, .search-options input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .generate-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .thesis-container {
+            display: none;
+            text-align: left;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #6e8efb;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .thesis-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .thesis-info {
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .thesis-info div {
+            margin-right: 15px;
+        }
+
+        .thesis-info span {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .thesis-field {
+            display: inline-block;
+            background: #e0e6f8;
+            color: #4a6bdf;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .thesis-abstract {
+            margin-top: 20px;
+            line-height: 1.7;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #6e8efb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin-top: 20px;
+            display: none;
+        }
+
+        footer {
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .external-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #6e8efb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .external-link:hover {
+            text-decoration: underline;
+        }
+
+        .source-info {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+
+        .keywords {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .keyword {
+            background: #e0f7fa;
+            color: #00838f;
+            padding: 2px 8px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Générateur de Thèses</h1>
+        <p>Trouvez des thèses françaises réelles !</p>
+        
+        <div class="search-options">
+            <label for="searchType">Type de recherche :</label>
+            <select id="searchType">
+                <option value="random">Thèse aléatoire</option>
+                <option value="keyword">Par mot-clé</option>
+                <option value="university">Par université</option>
+                <option value="year">Par année</option>
+                <option value="status">Par statut (soutenue/en préparation)</option>
+            </select>
+            
+            <div id="keywordField" style="display: none;">
+                <label for="keyword">Mot-clé :</label>
+                <input type="text" id="keyword" placeholder="Entrez un mot-clé (ex: biologie, IA...)">
+            </div>
+            
+            <div id="universityField" style="display: none;">
+                <label for="university">Université :</label>
+                <input type="text" id="university" placeholder="Entrez une université (ex: Sorbonne, Paris-Saclay...)">
+            </div>
+            
+            <div id="yearField" style="display: none;">
+                <label for="year">Année :</label>
+                <input type="number" id="year" placeholder="Entrez une année (ex: 2020)" min="1900" max="2025">
+            </div>
+
+            <div id="statusField" style="display: none;">
+                <label for="status">Statut :</label>
+                <select id="status">
+                    <option value="soutenue">Soutenue</option>
+                    <option value="en_preparation">En préparation</option>
+                </select>
+            </div>
+        </div>
+        
+        <button class="generate-btn" id="generateBtn">Trouver une Thèse</button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Recherche en cours dans Theses.fr...</p>
+        </div>
+        
+        <div class="error-message" id="errorMessage">
+            Une erreur est survenue lors de la recherche. Veuillez réessayer.
+        </div>
+        
+        <div class="thesis-container" id="thesisContainer">
+            <div class="thesis-title" id="thesisTitle"></div>
+            <div class="thesis-info">
+                <div><span>Auteur:</span> <span id="thesisAuthor"></span></div>
+                <div><span>Université:</span> <span id="thesisUniversity"></span></div>
+                <div><span>Année:</span> <span id="thesisYear"></span></div>
+                <div><span>Directeur:</span> <span id="thesisDirector"></span></div>
+                <div><span>Discipline:</span> <span id="thesisDiscipline"></span></div>
+                <div><span>Statut:</span> <span id="thesisStatus"></span></div>
+                <div><span>Domaine:</span> <span id="thesisDomain"></span></div>
+            </div>
+            <div class="keywords" id="thesisKeywords"></div>
+            <div class="thesis-abstract" id="thesisAbstract"></div>
+            <a href="#" class="external-link" id="thesisLink" target="_blank">Voir la thèse sur Theses.fr</a>
+            <div class="source-info">Données récupérées en direct depuis l'API Theses.fr via data.gouv.fr</div>
+        </div>
+    </div>
+    
+    <footer>
+        © 2025 Générateur de Thèses | 
+        by fiakx
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchType = document.getElementById('searchType');
+            const keywordField = document.getElementById('keywordField');
+            const universityField = document.getElementById('universityField');
+            const yearField = document.getElementById('yearField');
+            const statusField = document.getElementById('statusField');
+            const generateBtn = document.getElementById('generateBtn');
+            
+            // Gestion du changement de type de recherche
+            searchType.addEventListener('change', function() {
+                keywordField.style.display = 'none';
+                universityField.style.display = 'none';
+                yearField.style.display = 'none';
+                statusField.style.display = 'none';
+                
+                if (this.value === 'keyword') {
+                    keywordField.style.display = 'block';
+                } else if (this.value === 'university') {
+                    universityField.style.display = 'block';
+                } else if (this.value === 'year') {
+                    yearField.style.display = 'block';
+                } else if (this.value === 'status') {
+                    statusField.style.display = 'block';
+                }
+            });
+            
+            // Bouton de génération
+            generateBtn.addEventListener('click', fetchThesisFromAPI);
+        });
+
+        // Fonction pour contourner les problèmes CORS
+        async function fetchWithCORSFallback(url) {
+            try {
+                // Essai direct
+                const response = await fetch(url);
+                if (response.ok) return response;
+                
+                // Si échec, essai avec proxy CORS
+                const proxyUrl = 'https://corsproxy.io/?';
+                const proxiedResponse = await fetch(proxyUrl + encodeURIComponent(url));
+                return proxiedResponse;
+            } catch (error) {
+                console.error("Erreur CORS:", error);
+                throw new Error("Problème de connexion à l'API. Veuillez réessayer plus tard.");
+            }
+        }
+
+        async function fetchThesisFromAPI() {
+            const searchType = document.getElementById('searchType').value;
+            const keyword = document.getElementById('keyword').value;
+            const university = document.getElementById('university').value;
+            const year = document.getElementById('year').value;
+            const status = document.getElementById('status')?.value;
+            
+            const btn = document.getElementById('generateBtn');
+            const loading = document.getElementById('loading');
+            const thesisContainer = document.getElementById('thesisContainer');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Réinitialiser l'affichage
+            errorMessage.style.display = 'none';
+            thesisContainer.style.display = 'none';
+            loading.style.display = 'block';
+            btn.disabled = true;
+            
+            try {
+                let apiUrl = 'https://theses.fr/api/v1/theses/recherche/';
+                let searchParam = '';
+                
+                // Construire la requête en fonction du type de recherche
+                switch(searchType) {
+                    case 'keyword':
+                        if (!keyword) throw new Error('Veuillez entrer un mot-clé');
+                        searchParam = keyword;
+                        break;
+                    case 'university':
+                        if (!university) throw new Error('Veuillez entrer une université');
+                        searchParam = university;
+                        break;
+                    case 'year':
+                        if (!year) throw new Error('Veuillez entrer une année');
+                        searchParam = year;
+                        break;
+                    case 'status':
+                        if (!status) throw new Error('Veuillez sélectionner un statut');
+                        searchParam = status === 'soutenue' ? 'thèse soutenue' : 'thèse en préparation';
+                        break;
+                    default: // random
+                        // Pour une recherche aléatoire, on prend un mot commun
+                        const randomWords = ['recherche', 'analyse', 'étude', 'développement', 'modèle', 'système', 'méthode'];
+                        searchParam = randomWords[Math.floor(Math.random() * randomWords.length)];
+                }
+                
+                // Construire l'URL avec les paramètres
+                const params = new URLSearchParams({
+                    q: searchParam,
+                    debut: 0,
+                    nombre: 20 // On récupère plusieurs résultats pour pouvoir en choisir un aléatoirement
+                });
+                
+                apiUrl += '?' + params.toString();
+                
+                // Faire l'appel à l'API avec gestion CORS
+                const response = await fetchWithCORSFallback(apiUrl);
+                
+                if (!response.ok) {
+                    // Gestion des erreurs spécifiques
+                    if (response.status === 429) {
+                        throw new Error('Limite de requêtes atteinte. Veuillez réessayer plus tard.');
+                    }
+                    throw new Error(`Erreur API: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Vérifier qu'il y a des résultats
+                if (!data.theses || data.theses.length === 0) {
+                    throw new Error('Aucune thèse trouvée avec ces critères');
+                }
+                
+                // Prendre un résultat aléatoire
+                const thesis = data.theses[Math.floor(Math.random() * data.theses.length)];
+                
+                // Formater et afficher les données
+                displayThesis(thesis);
+                
+            } catch (error) {
+                console.error("Erreur:", error);
+                loading.style.display = 'none';
+                errorMessage.style.display = 'block';
+                errorMessage.textContent = `Erreur: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayThesis(thesis) {
+            // Titre
+            document.getElementById('thesisTitle').textContent = thesis.titrePrincipal || 'Titre non disponible';
+            
+            // Auteur
+            let auteurs = 'Auteur inconnu';
+            if (thesis.auteurs && thesis.auteurs.length > 0) {
+                auteurs = thesis.auteurs.map(a => `${a.prenom} ${a.nom}`).join(', ');
+            }
+            document.getElementById('thesisAuthor').textContent = auteurs;
+            
+            // Université
+            const univ = thesis.etabSoutenanceN || 'Université non spécifiée';
+            document.getElementById('thesisUniversity').textContent = univ;
+            
+            // Année
+            const dateSoutenance = thesis.dateSoutenance;
+            const year = dateSoutenance ? dateSoutenance.substring(0, 4) : 'Année inconnue';
+            document.getElementById('thesisYear').textContent = year;
+            
+            // Directeur
+            let directeurs = 'Directeur non spécifié';
+            if (thesis.directeurs && thesis.directeurs.length > 0) {
+                directeurs = thesis.directeurs.map(d => `${d.prenom} ${d.nom}`).join(', ');
+            }
+            document.getElementById('thesisDirector').textContent = directeurs;
+            
+            // Discipline
+            const discipline = thesis.discipline || 'Domaine non spécifié';
+            document.getElementById('thesisDiscipline').textContent = discipline;
+            
+            // Statut
+            const status = thesis.status === 'soutenue' ? 'Soutenue' : 
+                         thesis.status === 'en_preparation' ? 'En préparation' : 'Statut inconnu';
+            document.getElementById('thesisStatus').textContent = status;
+            
+            // Domaine thématique (depuis écoles doctorales)
+            let domain = 'Domaine non spécifié';
+            if (thesis.ecolesDoctorale && thesis.ecolesDoctorale.length > 0) {
+                domain = thesis.ecolesDoctorale.map(ed => ed.nom).join(', ');
+            }
+            document.getElementById('thesisDomain').textContent = domain;
+            
+            // Mots-clés
+            const keywordsContainer = document.getElementById('thesisKeywords');
+            keywordsContainer.innerHTML = '';
+            if (thesis.sujetsRameau && thesis.sujetsRameau.length > 0) {
+                thesis.sujetsRameau.forEach(keyword => {
+                    const span = document.createElement('span');
+                    span.className = 'keyword';
+                    span.textContent = keyword.libelle || keyword;
+                    keywordsContainer.appendChild(span);
+                });
+            } else if (thesis.sujets && thesis.sujets.length > 0) {
+                thesis.sujets.forEach(sujet => {
+                    const span = document.createElement('span');
+                    span.className = 'keyword';
+                    span.textContent = sujet.libelle || sujet;
+                    keywordsContainer.appendChild(span);
+                });
+            }
+            
+            // Résumé (pas disponible dans le format de l'API actuel)
+            document.getElementById('thesisAbstract').textContent = 
+                'Résumé non disponible dans cette version de l\'API. Consultez la page complète pour plus de détails.';
+            
+            // Lien vers la thèse
+            if (thesis.id) {
+                const link = `https://www.theses.fr/${thesis.id}`;
+                document.getElementById('thesisLink').href = link;
+                document.getElementById('thesisLink').style.display = 'inline-block';
+            } else if (thesis.nnt) {
+                const link = `https://www.theses.fr/${thesis.nnt}`;
+                document.getElementById('thesisLink').href = link;
+                document.getElementById('thesisLink').style.display = 'inline-block';
+            } else {
+                document.getElementById('thesisLink').style.display = 'none';
+            }
+            
+            // Afficher les résultats
+            document.getElementById('thesisContainer').style.display = 'block';
+        }
+    </script>
+    
+</body>
+</html>
