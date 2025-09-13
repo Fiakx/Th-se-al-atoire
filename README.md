@@ -1,4 +1,4 @@
-# 🔍 Générateur de Thèses Universitaires Réelles 🎓
+#  Générateur de Thèses Universitaires (qui existent)
 
 *"Parce que chercher une thèse devrait être aussi excitant que de la découvrir !"*
 
