@@ -6,14 +6,14 @@ Un outil magique qui explore l'API [theses.fr](https://www.theses.fr) pour déni
 
 ##  Fonctionnalités
 
--  **Recherche intelligente** : Par mot-clé, université, année ou statut
--  **Mode aléatoire** : Laissez-vous surprendre ! (Parfait pour les indécis :sweat_smile:)
+-  **Recherche intelligente** : Par mot-clé, université, année ou statut (y'a rien d'intelligent mais on fait genre)
+-  **Mode aléatoire** : Laissez-vous surprendre ! (Parfait pour les indécis )
 -  **Détails complets** : Résumés, jury, mots-clés... Tout y est !
 -  **Multilingue** : Parce que la science n'a pas de frontières
 -  **Moderne** : Interface fluide et animations élégantes
 
 ##  Installation
 
-1. Clonez ce dépôt (oui, c'est indispensable :stuck_out_tongue:):
+1. Clonez ce dépôt (sah):
    ```bash
    git clone https://github.com/votre-utilisateur/votre-repo.git
