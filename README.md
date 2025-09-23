@@ -14,6 +14,6 @@ Un outil magique qui explore l'API [theses.fr](https://www.theses.fr) pour déni
 
 ##  Installation
 
-1. Clonez ce dépôt (sah):
+1. Clonez ce dépôt (svp):
    ```bash
    git clone https://github.com/votre-utilisateur/votre-repo.git
